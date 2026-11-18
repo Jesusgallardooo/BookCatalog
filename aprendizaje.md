@@ -71,3 +71,45 @@ respuestas JSON.
   - Implementación en grupo de los DTOs, el modelo y la adaptación del controlador.
   - Revisión del código para comprender el paso de JSON a objetos Java (`@RequestBody`) y viceversa.
   - Siguiente paso: Activar la Entrega 3.
+
+---
+
+## Entrega 3
+
+- **Comportamiento que añadimos o contrato que evolucionamos**:
+  Mejoramos los códigos de respuesta HTTP usando `ResponseEntity`. Ahora, al crear un libro (`POST`), la API
+responde con un `201 Created` y añade la cabecera `Location: /books/{id}` con la URL del libro recién creado.
+Al borrar (`DELETE`), responde con un `204 No Content` sin enviar ningún cuerpo. Las consultas (`GET`) y 
+modificaciones (`PUT`) siguen devolviendo `200 OK`.
+
+
+- **Test y rojo observado (distinguir compilación/configuración de comportamiento)**:
+  - *Compilación:* El proyecto compilaba bien sin errores de código ni de imports.
+  - *Comportamiento:* Al activar la entrega (`java classroom/ActivarEntrega.java 3`), el test `BookCheckpoint03Test` falló
+  porque el `POST` devolvía un `200 OK` en vez de un `201` y no traía la cabecera `Location`, y el `DELETE` devolvía
+  un `200` en lugar de un `204`.
+
+- **Cambio mínimo y resultado verde**:
+  - Cambiamos el tipo de retorno de los métodos de `BookController.java` para que todos devuelvan un `ResponseEntity`.
+  - En el `POST /books`, pusimos `ResponseEntity.created(URI.create("/books/" + newId)).body(response)`.
+  - En el `DELETE /books/{id}`, usamos `ResponseEntity.noContent().build()`.
+  - Volvimos a lanzar `./mvnw test` y la prueba pasó a verde.
+
+
+- **Refactorización**:
+  Dejamos todos los endpoints del controlador adaptados para que devuelvan siempre sus respuestas envueltas en un `ResponseEntity`
+de forma limpia.
+
+
+- **Decisiones sobre capas y contrato HTTP**:
+- **Uso de ResponseEntity:** Nos sirve para controlar exactamente qué código de estado (`201`, `204`, `200`, `404`) y qué
+cabeceras devolvemos al cliente en cada caso.
+- **Cabecera Location:** Sirve para informarle a quien use la API de la ruta exacta donde se puede consultar el nuevo libro
+creado.
+
+
+- **Contribuciones, revisión y siguiente paso**:
+  - **Contribuciones:** Modificación del controlador `BookController.java`, comprobación de los tests y redacción de este
+  apartado de aprendizaje.
+  - **Siguiente paso:** Activar la **Entrega 4** (`java classroom/ActivarEntrega.java 4`) para sacar la lógica y la lista
+  en memoria del controlador y llevarlas a una clase de servicio (`BookService`).
